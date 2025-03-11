@@ -15,10 +15,9 @@ const getProfile = async (req, res) => {
                 e.department,
                 e.position,
                 e.qr_code,
-                r.id as role_id,
-                r.name as role_name
+                r.name as role
             FROM employees e
-            JOIN roles r ON e.role_id = r.id
+            LEFT JOIN roles r ON e.role_id = r.id
             WHERE e.id = ?`,
             [userId]
         );
@@ -35,7 +34,7 @@ const getProfile = async (req, res) => {
             id: user.id,
             name: user.name,
             email: user.email,
-            role: user.role_name,
+            role: user.role,
             hasQrCode: !!user.qr_code
         });
 
@@ -74,8 +73,7 @@ const getProfile = async (req, res) => {
             department: user.department,
             position: user.position,
             qr_code: user.qr_code,
-            role: user.role_name,
-            role_id: user.role_id
+            role: user.role || 'employee'
         };
 
         return res.json({
@@ -109,6 +107,7 @@ const updateProfile = async (req, res) => {
             });
         }
 
+        // Update the employee record
         await db.execute(
             'UPDATE employees SET name = ?, department = ?, position = ? WHERE id = ?',
             [name, department, position, userId]
@@ -123,10 +122,9 @@ const updateProfile = async (req, res) => {
                 e.department,
                 e.position,
                 e.qr_code,
-                r.id as role_id,
-                r.name as role_name
+                r.name as role
             FROM employees e
-            JOIN roles r ON e.role_id = r.id
+            LEFT JOIN roles r ON e.role_id = r.id
             WHERE e.id = ?`,
             [userId]
         );
@@ -141,8 +139,7 @@ const updateProfile = async (req, res) => {
                 department: users[0].department,
                 position: users[0].position,
                 qr_code: users[0].qr_code,
-                role: users[0].role_name,
-                role_id: users[0].role_id
+                role: users[0].role || 'employee'
             }
         });
     } catch (error) {
